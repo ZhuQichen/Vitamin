@@ -112,7 +112,7 @@ var actionHandler = {
 		});
 	},
 	getToday: function (uid, vertex, callback) {
-		xattr.get(devfsPath + '/' + uid + '/' + vertex, 'today_20', callback);
+		xattr.get(devfsPath + '/' + uid + '/' + vertex, 'today_24', callback);
 	},
 	enable: function (uid, vertex, callback) {
 		xattr.set(devfsPath + '/' + uid + '/' + vertex, 'enable', '', callback);
