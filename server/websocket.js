@@ -119,6 +119,26 @@ var actionHandler = {
 	},
 	disable: function (uid, vertex, callback) {
 		xattr.set(devfsPath + '/' + uid + '/' + vertex, 'disable', '', callback);
+	},
+	setRule: function (uid, vertex, data, callback) {
+		//data： {dstVertex, min, max, enable}
+		//touch /edge/vertex/data.dstVertex
+		//modify /attr/vertex/handle:
+		/*
+		 def func(args):
+			 r = (0, 100)
+			 if len(args) != 1 or type(args) != dict:
+				return
+			 try:
+				args = args[args.keys()[0]]
+				if len(args) != 1 or type(args) != dict:
+					return
+				val = float(args[args.keys()[0]])
+				if val >= r[0] and val <= r[1]:
+					return "{Enable:True}"
+			 except:
+				pass
+		 */
 	}
 }
 
@@ -172,6 +192,12 @@ function startWebSocket(db) {
 						if (message.action in actionHandler) {
 							actionHandler[message.action](session.uid, message.vertex, function (err, data) {
 								webSocketSend({action: message.action, vertex: message.vertex, err: Boolean(err), data: data});
+							});
+						}
+					} else if (message.action.indexOf('set') == 0) {
+						if ((message.action in actionHandler) && message.data) {
+							actionHandler[message.action](session.uid, message.vertex, message.data, function (err) {
+								webSocketSend({action: message.action, vertex: message.vertex, data: message.data, err: Boolean(err)});
 							});
 						}
 					} else if ((message.action === 'enable') || (message.action === 'disable')) {
