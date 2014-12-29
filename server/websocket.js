@@ -122,7 +122,7 @@ var actionHandler = {
 	},
 	setRule: function (uid, vertex, data, callback) {
 		createFile(devfsPath + '/' + uid + '/' + 'edge' + '/' + data.dst, function(err) {
-			if (err) {
+			if (err && err.code !== 'EEXIST') {
 				callback(err);
 			} else {
 				var handler = 'def func(args):\n' +
