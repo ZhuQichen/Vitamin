@@ -193,6 +193,7 @@ function startWebSocket(db) {
 					} else if (message.action.indexOf('set') == 0) {
 						if ((message.action in actionHandler) && message.data) {
 							actionHandler[message.action](session.uid, message.vertex, message.data, function (err) {
+								console.log(err);
 								webSocketSend({action: message.action, vertex: message.vertex, data: message.data, err: Boolean(err)});
 							});
 						}
