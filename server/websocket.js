@@ -121,24 +121,20 @@ var actionHandler = {
 		xattr.set(devfsPath + '/' + uid + '/' + vertex, 'disable', '', callback);
 	},
 	setRule: function (uid, vertex, data, callback) {
-		//data： {dstVertex, min, max, enable}
-		//touch /edge/vertex/data.dstVertex
-		//modify /attr/vertex/handle:
-		/*
-		 def func(args):
-			 r = (0, 100)
-			 if len(args) != 1 or type(args) != dict:
-				return
-			 try:
-				args = args[args.keys()[0]]
-				if len(args) != 1 or type(args) != dict:
-					return
-				val = float(args[args.keys()[0]])
-				if val >= r[0] and val <= r[1]:
-					return "{Enable:True}"
-			 except:
-				pass
-		 */
+		createFile(devfsPath + '/' + uid + '/' + 'edge' + '/' + data.dst, function(err) {
+			if (err) {
+				callback(err);
+			} else {
+				var handler = 'def func(args):\n' +
+					'\tr = (' + data.min + ', ' + data.max + ')\n' +
+					'\treal_args = args.values()[0]\n' +
+					'\tval = float(real_args.values()[' + data.aspect + '])\n' +
+					'\tif val >= r[0] and val <= r[1]:\n' +
+					'\t\treturn {"Enable":True}\n';
+				fs.writeFile(devfsPath + '/' + uid + '/' + 'attr' + '/' + vertex + '/' + 'handler', handler,
+					{encoding: 'utf8', mode: 0644, flag: 'w'}, callback);
+			}
+		});
 	}
 }
 
