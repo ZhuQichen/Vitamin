@@ -121,7 +121,7 @@ var actionHandler = {
 		xattr.set(devfsPath + '/' + uid + '/' + vertex, 'disable', '', callback);
 	},
 	setRule: function (uid, vertex, data, callback) {
-		createFile(devfsPath + '/' + uid + '/' + 'edge' + '/' + data.dst, function(err) {
+		createFile(devfsPath + '/' + uid + '/' + 'edge' + '/' + vertex + '/' + data.dst, function(err) {
 			if (err && err.code !== 'EEXIST') {
 				callback(err);
 			} else {
