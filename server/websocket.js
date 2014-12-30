@@ -75,7 +75,7 @@ var actionHandler = {
 	},
 
 	list: function(uid, callback) {
-		fs.readdir(getVertexPath(uid, vertex), function(err, data) {
+		fs.readdir(getVertexPath(uid), function(err, data) {
 			if (err) {
 				callback(err);
 			} else {

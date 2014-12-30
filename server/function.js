@@ -62,22 +62,37 @@ function getUserPath(uid) {
 	return devfsPath + '/' + uid;
 }
 
-function getDataPath(uid, vertex) {
-	return getUserPath(uid) + '/' + vertex;
-}
-
-function getEdgePath(uid, vertex, dstVertex) {
-	if (typeof(dstVertex) === 'undefined') {
-		return getUserPath(uid) + '/edge/' + vertex;
+function getPath(uid, property, vertex, subVertex) {
+	if (typeof(property) === 'undefined') {
+		if (typeof(vertex) === 'undefined') {
+			return getUserPath(uid);
+		} else {
+			return getUserPath(uid) + '/' + vertex;
+		}
 	} else {
-		return getUserPath(uid) + '/edge/' + vertex + '/' + dstVertex;
+		if (typeof(vertex) === 'undefined') {
+			return getUserPath(uid) + '/' + property;
+		} else {
+			if (typeof(subVertex) === 'undefined') {
+				return getUserPath(uid) + '/' + property + '/' + vertex;
+			} else {
+				return getUserPath(uid) + '/' + property + '/' + vertex + '/' + dstVertex;
+			}
+		}
 	}
 }
 
+function getDataPath(uid, vertex) {
+	return getPath(uid, null, vertex);
+}
+
+function getEdgePath(uid, vertex, subVertex) {
+	getPath(uid, 'edge', vertex, subVertex);
+}
 function getVertexPath(uid, vertex) {
-	return getUserPath(uid) + '/vertex/' + vertex;
+	getPath(uid, 'vertex', vertex, subVertex);
 }
 
 function getAttrPath(uid, vertex, attr) {
-	return getUserPath(uid) + '/attr/' + vertex + '/' + attr;
+	getPath(uid, 'attr', vertex, attr);
 }
