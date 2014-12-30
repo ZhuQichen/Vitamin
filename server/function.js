@@ -74,38 +74,38 @@ function getVertexPropertyPath(uid, property, vertex) {
 	return getPropertyPath(uid, property) + '/' + vertex;
 }
 
-function getVertexPropertySubVertexPath(uid, property, vertex) {
+function getVertexPropertySubVertexPath(uid, property, vertex, subVertex) {
 	return getVertexPropertyPath(uid, property, vertex) + '/' + subVertex;
 }
 
 function getPath(uid, property, vertex, subVertex) {
-	if (typeof(property) === 'undefined') {
-		if (typeof(vertex) === 'undefined') {
-			return getUserPath(uid);
+	if (property) {
+		if (vertex) {
+			if (subVertex) {
+				return getVertexPropertySubVertexPath(uid, property, vertex, subVertex);
+			} else {
+				return getVertexPropertyPath(uid, property, vertex);
+			}
 		} else {
-			return getDataPath(uid, vertex);
+			return getPropertyPath(uid, property);
 		}
 	} else {
-		if (typeof(vertex) === 'undefined') {
-			return getPropertyPath(uid, property);
+		if (vertex) {
+			return getDataPath(uid, vertex);
 		} else {
-			if (typeof(subVertex) === 'undefined') {
-				return getVertexPropertyPath(uid, property, vertex);
-			} else {
-				return getVertexPropertySubVertexPath(uid, property, vertex, subVertex);
-			}
+			return getUserPath(uid);
 		}
 	}
 }
 
 function getEdgePath(uid, vertex, subVertex) {
-	getPath(uid, 'edge', vertex, subVertex);
+	return getPath(uid, 'edge', vertex, subVertex);
 }
 
 function getVertexPath(uid, vertex, subVertex) {
-	getPath(uid, 'vertex', vertex, subVertex);
+	return getPath(uid, 'vertex', vertex, subVertex);
 }
 
 function getAttrPath(uid, vertex, attr) {
-	getPath(uid, 'attr', vertex, attr);
+	return getPath(uid, 'attr', vertex, attr);
 }
