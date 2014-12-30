@@ -136,7 +136,7 @@ function startWebSocket(db) {
 	webSocketServer.on('connection', function(webSocket) {
 		var session = {id: randomId(), uid: '', path: '', watchState: false, webSocket: webSocket};
 		function webSocketSend(messageId, err, data) {
-			webSocket.send(JSON.stringify({sessionId: session.id, messageId: messageId, err: Boolean(err), data: data}));
+			webSocket.send(JSON.stringify({sessionId: session.id, id: messageId, err: Boolean(err), data: data}));
 			if (err) {
 				debugLog(err);
 			}
@@ -145,7 +145,7 @@ function startWebSocket(db) {
 		webSocket.on('message', function(messageString) {
 			debugLog('Client Said: ' + messageString);
 			try { var message = JSON.parse(messageString); } catch (e) { return; }
-			if (!(message && message.sessionId && message.messageId && message.action && actionHandler.hasOwnProperty(message.action))) return;
+			if (!(message && message.sessionId && message.id && message.action && actionHandler.hasOwnProperty(message.action))) return;
 			if (message.action === 'auth') {
 				if (message.user && message.password) {
 					actionHandler[message.action](db, message.user, message.password, function(err, uid) {
@@ -153,15 +153,15 @@ function startWebSocket(db) {
 							session.uid = uid;
 							session.path = devfsPath + '/' + uid;
 						}
-						webSocketSend(message.messageId, err);
+						webSocketSend(message.id, err);
 					});
 				} else {
-					webSocketSend(message.messageId, true);
+					webSocketSend(message.id, true);
 				}
 			} else if (session.uid) {
 				if (message.action === 'list') {
 					actionHandler[message.action](session.uid, function(err, list) {
-						webSocketSend(message.messageId, err, list);
+						webSocketSend(message.id, err, list);
 						if (!session.watchState) {
 							var date = {};
 							for (var i in list) {
@@ -173,17 +173,17 @@ function startWebSocket(db) {
 				} else if (message.vertex) {
 					if (message.action.indexOf('get') == 0) {
 						actionHandler[message.action](session.uid, message.vertex, function(err, data) {
-							webSocketSend(message.messageId, err, data);
+							webSocketSend(message.id, err, data);
 						});
 					} else if (message.action.indexOf('set') == 0) {
 						if (message.data) {
 							actionHandler[message.action](session.uid, message.vertex, message.data, function(err) {
-								webSocketSend(message.messageId, err);
+								webSocketSend(message.id, err);
 							});
 						}
 					} else if ((message.action === 'enable') || (message.action === 'disable')) {
 						actionHandler[message.action](session.uid, message.vertex, function(err) {
-							webSocketSend(message.messageId, err);
+							webSocketSend(message.id, err);
 						});
 					}
 				}
