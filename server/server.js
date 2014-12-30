@@ -29,7 +29,7 @@ eval(fs.readFileSync(__dirname + '/const.js').toString());
 eval(fs.readFileSync(__dirname + '/function.js').toString());
 eval(fs.readFileSync(__dirname + '/websocket.js').toString());
 
-var db = new mongodb.Db('test', new mongodb.Server("localhost", mongodb.Connection.DEFAULT_PORT, { auto_reconnect: true }), { w: 1 });
+var db = new mongodb.Db('test',new mongodb.Server("localhost", mongodb.Connection.DEFAULT_PORT, { auto_reconnect: true }), { w: 1 });
 db.open(function(err, databaseConnection) {
 	if (err) {
 		return;
