@@ -147,8 +147,8 @@ function startWebSocket(db) {
 			try { var message = JSON.parse(messageString); } catch (e) { return; }
 			if (!(message && message.sessionId && message.id && message.action && actionHandler.hasOwnProperty(message.action))) return;
 			if (message.action === 'auth') {
-				if (message.user && message.password) {
-					actionHandler[message.action](db, message.user, message.password, function(err, uid) {
+				if (message.data && message.data.user && message.data.password) {
+					actionHandler[message.action](db, message.data.user, message.data.password, function(err, uid) {
 						if (!err) {
 							session.uid = uid;
 							session.path = devfsPath + '/' + uid;
