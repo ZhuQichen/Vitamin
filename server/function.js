@@ -20,7 +20,7 @@
 
 function debugLog(log) {
 	if (debugFlag) {
-		process.stdout.write(new Date().toString());
+		process.stdout.write(new Date().toString() + ' ');
 		console.log(log);
 	}
 }
@@ -62,34 +62,47 @@ function getUserPath(uid) {
 	return devfsPath + '/' + uid;
 }
 
+function getDataPath(uid, vertex) {
+	return getUserPath(uid) + '/' + vertex;
+}
+
+function getPropertyPath(uid, property) {
+	return getUserPath(uid) + '/' + property;
+}
+
+function getVertexPropertyPath(uid, property, vertex) {
+	return getPropertyPath(uid, property) + '/' + vertex;
+}
+
+function getVertexPropertySubVertexPath(uid, property, vertex) {
+	return getVertexPropertyPath(uid, property, vertex) + '/' + subVertex;
+}
+
 function getPath(uid, property, vertex, subVertex) {
 	if (typeof(property) === 'undefined') {
 		if (typeof(vertex) === 'undefined') {
 			return getUserPath(uid);
 		} else {
-			return getUserPath(uid) + '/' + vertex;
+			return getDataPath(uid, vertex);
 		}
 	} else {
 		if (typeof(vertex) === 'undefined') {
-			return getUserPath(uid) + '/' + property;
+			return getPropertyPath(uid, property);
 		} else {
 			if (typeof(subVertex) === 'undefined') {
-				return getUserPath(uid) + '/' + property + '/' + vertex;
+				return getVertexPropertyPath(uid, property, vertex);
 			} else {
-				return getUserPath(uid) + '/' + property + '/' + vertex + '/' + dstVertex;
+				return getVertexPropertySubVertexPath(uid, property, vertex, subVertex);
 			}
 		}
 	}
 }
 
-function getDataPath(uid, vertex) {
-	return getPath(uid, null, vertex);
-}
-
 function getEdgePath(uid, vertex, subVertex) {
 	getPath(uid, 'edge', vertex, subVertex);
 }
-function getVertexPath(uid, vertex) {
+
+function getVertexPath(uid, vertex, subVertex) {
 	getPath(uid, 'vertex', vertex, subVertex);
 }
 
