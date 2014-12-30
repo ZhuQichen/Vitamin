@@ -143,7 +143,7 @@ function startWebSocket(db) {
 		}
 		
 		webSocket.on('message', function(messageString) {
-			debugLog('Client Said: ' + messageString);
+			debugLog('Client: ' + messageString);
 			try { var message = JSON.parse(messageString); } catch (e) { return; }
 			if (!(message && message.sessionId && message.id && message.action && actionHandler.hasOwnProperty(message.action))) return;
 			if (message.action === 'auth') {
