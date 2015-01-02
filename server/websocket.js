@@ -236,7 +236,7 @@ function scan(watch) {
 				if (change) {
 					actionHandler.list(watch.session.uid, function(err, list) {
 						for (var i in watch.send) {
-							watch.send[i]({id: watch.sendId[i], err: Boolean(err), data: list});
+							watch.send[i].func(watch.send[i].id, Boolean(err), list);
 						}
 					});
 				}
@@ -273,10 +273,9 @@ function addWatch(session, date, send, id) {
 	}
 	session.watchState = true;
 	if (!(session.uid in watchList)) {
-		watchList[session.uid] = {session: session, date: date, send: {}, sendId: {}};
+		watchList[session.uid] = {session: session, date: date, send: {}};
 	}
-	watchList[session.uid].send[session.id] = send;
-	watchList[session.uid].sendId[session.id] = id;
+	watchList[session.uid].send[session.id] = {func: send, id: id};
 }
 
 function startWatch() {	
