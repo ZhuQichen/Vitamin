@@ -167,7 +167,7 @@ function startWebSocket(db) {
 							for (var i in list) {
 								date[i] = list[i].date;
 							}
-							addWatch(session, date, webSocketSend);
+							addWatch(session, date, webSocketSend, message.id);
 						}
 					});
 				} else if (message.vertex) {
@@ -236,8 +236,7 @@ function scan(watch) {
 				if (change) {
 					actionHandler.list(watch.session.uid, function(err, list) {
 						for (var i in watch.send) {
-							watch.send[i]({action: 'list', err: Boolean(err), data: list},
-									JSON.stringify({action: 'list', err: Boolean(err)}));
+							watch.send[i]({id: watch.sendId[i], err: Boolean(err), data: list});
 						}
 					});
 				}
@@ -268,15 +267,16 @@ function scan(watch) {
 	});
 }
 
-function addWatch(session, date, send) {
+function addWatch(session, date, send, id) {
 	if (session.watchState) {
 		return;
 	}
 	session.watchState = true;
 	if (!(session.uid in watchList)) {
-		watchList[session.uid] = {session: session, date: date, send: {}};
+		watchList[session.uid] = {session: session, date: date, send: {}, sendId: {}};
 	}
 	watchList[session.uid].send[session.id] = send;
+	watchList[session.uid].sendId[session.id] = id;
 }
 
 function startWatch() {	
