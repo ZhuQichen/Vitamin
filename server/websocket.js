@@ -111,7 +111,7 @@ var actionHandler = {
 	disable: function(uid, vertex, callback) {
 		xattr.set(getDataPath(uid, vertex), 'disable', '', function(err, data) {
 			if (data) {
-				callback(err, data.toString();
+				callback(err, data.toString());
 			} else {
 				callback(err);
 			}
