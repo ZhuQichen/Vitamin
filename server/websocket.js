@@ -101,7 +101,7 @@ var actionHandler = {
 	},
 
 	getToday: function(uid, vertex, callback) {
-		xattr.get(getDataPath(uid, vertex), 'today_24', function() {
+		xattr.get(getDataPath(uid, vertex), 'today_24', function(err, data) {
 			if (data) {
 				callback(err, data.toString());
 			} else {
