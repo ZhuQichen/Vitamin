@@ -109,7 +109,13 @@ var actionHandler = {
 	},
 
 	disable: function(uid, vertex, callback) {
-		xattr.set(getDataPath(uid, vertex), 'disable', '', callback);
+		xattr.set(getDataPath(uid, vertex), 'disable', '', function(err, data) {
+			if (data) {
+				callback(err, data.toString();
+			} else {
+				callback(err);
+			}
+		});
 	},
 
 	setRule: function(uid, vertex, data, callback) {
