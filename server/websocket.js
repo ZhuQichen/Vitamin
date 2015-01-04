@@ -101,7 +101,13 @@ var actionHandler = {
 	},
 
 	getToday: function(uid, vertex, callback) {
-		xattr.get(getDataPath(uid, vertex), 'today_24', callback);
+		xattr.get(getDataPath(uid, vertex), 'today_24', function() {
+			if (data) {
+				callback(err, data.toString());
+			} else {
+				callback(err);
+			}
+		});
 	},
 
 	enable: function(uid, vertex, callback) {
@@ -109,13 +115,7 @@ var actionHandler = {
 	},
 
 	disable: function(uid, vertex, callback) {
-		xattr.set(getDataPath(uid, vertex), 'disable', '', function(err, data) {
-			if (data) {
-				callback(err, data.toString());
-			} else {
-				callback(err);
-			}
-		});
+		xattr.set(getDataPath(uid, vertex), 'disable', '', callback);
 	},
 
 	setRule: function(uid, vertex, data, callback) {
