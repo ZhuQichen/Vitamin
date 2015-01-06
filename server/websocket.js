@@ -119,17 +119,25 @@ var actionHandler = {
 	},
 
 	setRule: function(uid, vertex, data, callback) {
-		createFile(getEdgePath(uid, vertex) + '/' + data.dst, function(err) {
-			if (err && err.code !== 'EEXIST') {
+		var handler = 'def func(args):\n' +
+					  '\tr = (' + data.min + ', ' + data.max + ')\n' +
+					  '\treal_args = args.values()[0]\n' +
+					  '\tval = float(real_args.values()[' + data.aspect + '])\n' +
+					  '\tif val >= r[0] and val <= r[1]:\n' +
+					  '\t\treturn {"Enable":True}\n';
+		fs.writeFile(getAttrPath(uid, vertex, 'handler'), handler, {encoding: 'utf8', mode: 0644, flag: 'w'}, function(err) {
+			if (err) {
 				callback(err);
+			else if (vertex !== data.dst) {
+				createFile(getEdgePath(uid, vertex) + '/' + data.dst, function(err) {
+					if (err && err.code !== 'EEXIST') {
+						callback(err);
+					} else {
+						callbakc(false);
+					}
+				});
 			} else {
-				var handler = 'def func(args):\n' +
-					'\tr = (' + data.min + ', ' + data.max + ')\n' +
-					'\treal_args = args.values()[0]\n' +
-					'\tval = float(real_args.values()[' + data.aspect + '])\n' +
-					'\tif val >= r[0] and val <= r[1]:\n' +
-					'\t\treturn {"Enable":True}\n';
-				fs.writeFile(getAttrPath(uid, vertex, 'handler'), handler, {encoding: 'utf8', mode: 0644, flag: 'w'}, callback);
+				callback(false);
 			}
 		});
 	}
