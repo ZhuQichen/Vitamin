@@ -128,7 +128,7 @@ var actionHandler = {
 		fs.writeFile(getAttrPath(uid, vertex, 'handler'), handler, {encoding: 'utf8', mode: 0644, flag: 'w'}, function(err) {
 			if (err) {
 				callback(err);
-			else if (vertex !== data.dst) {
+			} else if (vertex !== data.dst) {
 				createFile(getEdgePath(uid, vertex) + '/' + data.dst, function(err) {
 					if (err && err.code !== 'EEXIST') {
 						callback(err);
