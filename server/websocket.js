@@ -143,11 +143,11 @@ var actionHandler = {
 	},
 	
 	setSync: function(uid, vertex, data, callback) {
-		fs.readFile(getAttrPath(uid, vertex, 'mode'), {encoding: 'utf8', flag: 'r'} , function(err, data) {
+		fs.readFile(getAttrPath(uid, vertex, 'mode'), {encoding: 'utf8', flag: 'r'} , function(err, origMode) {
 			if (err) {
 				callback(err);
 			} else {
-				var mode = parseInt(data);
+				var mode = parseInt(origMode);
 				if (isNaN(mode)) {
 					callback(true);
 				} else {
