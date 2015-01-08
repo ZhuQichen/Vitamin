@@ -140,6 +140,28 @@ var actionHandler = {
 				callback(false);
 			}
 		});
+	},
+	
+	setSync: function(uid, vertex, data, callback) {
+		fs.readFile(getAttrPath(uid, vertex, 'mode'), {encoding: 'utf8', flag: 'r'} , function(err, data) {
+			if (err) {
+				callback(err);
+			} else {
+				var mode = parseInt(data);
+				if (isNaN(mode)) {
+					callback(true);
+				} else {
+					mode = parseInt(mode / 128) * 128 + mode % 64 + (data ? 1 : 0) * 64;
+					fs.writeFile(getAttrPath(uid, vertex, 'mode'), mode, {encoding: 'utf8', mode: 0644, flag: 'w'}, function(err) {
+						if (err) {
+							callback(err);
+						} else {
+							callback(false);
+						}
+					});
+				}
+			}
+		});
 	}
 }
 
