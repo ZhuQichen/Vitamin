@@ -212,7 +212,7 @@ function startWebSocket(db) {
 							webSocketSend(message.id, err, data);
 						});
 					} else if (message.action.indexOf('set') == 0) {
-						if (message.data) {
+						if (typeof(message.data) !== 'undefined') {
 							actionHandler[message.action](session.uid, message.vertex, message.data, function(err) {
 								webSocketSend(message.id, err);
 							});
