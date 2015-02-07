@@ -26,7 +26,7 @@ var WebSocketServer = require('ws').Server;
 var crypto = require('crypto');
 
 eval(fs.readFileSync(__dirname + '/const.js').toString());
-eval(fs.readFileSync(__dirname + '/function.js').toString());
+eval(fs.readFileSync(__dirname + '/util.js').toString());
 eval(fs.readFileSync(__dirname + '/websocket.js').toString());
 
 var db = new mongodb.Db('test',new mongodb.Server("localhost", mongodb.Connection.DEFAULT_PORT, { auto_reconnect: true }), { w: 1 });
