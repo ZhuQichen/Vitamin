@@ -177,7 +177,7 @@ func SetState(uid, vid, state string) error {
 }
 
 type Session struct {
-	Id         string
+	Id         uuid.UUID
 	Uid        string
 	Path       string
 	WatchState bool
@@ -185,7 +185,6 @@ type Session struct {
 }
 
 type Message struct {
-	Sid    string      `json:"sessionId"`
 	Id     string      `json:"id"`
 	Action string      `json:"action"`
 	Vid    string      `json:"vertex"`
@@ -201,7 +200,7 @@ func wsHandler(ws *websocket.Conn) {
 	var err error
 	var res interface{}
 	session := Session{
-		Id:         uuid.New(),
+		Id:         uuid.NewRandom(),
 		Uid:        "",
 		Path:       "",
 		WatchState: false,
@@ -246,7 +245,7 @@ func wsHandler(ws *websocket.Conn) {
 			res, err = Auth(authData.Username, authData.Password)
 			if err == nil {
 				session.Uid = res.(string)
-				session.Path = DEVFS_PATH + "/" + res.(string)
+				session.Path = GetUserPath(session.Uid)
 			}
 		case "list":
 			res, err = List(session.Uid)
@@ -292,7 +291,6 @@ func wsHandler(ws *websocket.Conn) {
 			err = SetState(session.Uid, message.Vid, message.Action)
 		}
 		resMessage := make(map[string]interface{})
-		resMessage["sessionId"] = session.Id
 		resMessage["id"] = message.Id
 		if err != nil {
 			log.Println(session.Id, err)

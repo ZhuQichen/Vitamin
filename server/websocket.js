@@ -172,7 +172,7 @@ function startWebSocket(db) {
 	webSocketServer.on('connection', function(webSocket) {
 		var session = {id: randomId(), uid: '', path: '', watchState: false, webSocket: webSocket};
 		function webSocketSend(messageId, err, data) {
-			webSocket.send(JSON.stringify({sessionId: session.id, id: messageId, err: Boolean(err), data: data}));
+			webSocket.send(JSON.stringify({id: messageId, err: Boolean(err), data: data}));
 			if (err) {
 				debugLog(err);
 			}
@@ -181,7 +181,7 @@ function startWebSocket(db) {
 		webSocket.on('message', function(messageString) {
 			debugLog('Client: ' + messageString);
 			try { var message = JSON.parse(messageString); } catch (e) { return; }
-			if (!(message && message.sessionId && message.id && message.action && actionHandler.hasOwnProperty(message.action))) return;
+			if (!(message && message.action && actionHandler.hasOwnProperty(message.action))) return;
 			if (message.action === 'auth') {
 				if (message.data && message.data.user && message.data.password) {
 					actionHandler[message.action](db, message.data.user, message.data.password, function(err, uid) {
