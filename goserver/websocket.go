@@ -106,12 +106,13 @@ func GetVertex(uid, vid string) (vertex Vertex, rerr error) {
 	return vertex, nil
 }
 
-func List(uid string) (vertexes map[string]Vertex, rerr error) {
+func List(uid string) (map[string]Vertex, error) {
 	files, err := ioutil.ReadDir(GetVertexPath(uid, "", ""))
 	if err != nil {
 		return nil, err
 	}
 	count := len(files)
+	vertexes := make(map[string]Vertex)
 	if count == 0 {
 		return vertexes, nil
 	}
