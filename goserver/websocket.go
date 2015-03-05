@@ -178,7 +178,7 @@ func SetState(uid, vid, state string) error {
 }
 
 type Session struct {
-	Id         uuid.UUID
+	Id         string
 	Uid        string
 	Path       string
 	WatchState bool
@@ -201,7 +201,7 @@ func wsHandler(ws *websocket.Conn) {
 	var err error
 	var res interface{}
 	session := Session{
-		Id:         uuid.NewRandom(),
+		Id:         uuid.New(),
 		Uid:        "",
 		Path:       "",
 		WatchState: false,
