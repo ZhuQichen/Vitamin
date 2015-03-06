@@ -30,6 +30,7 @@ eval(fs.readFileSync(__dirname + '/util.js').toString());
 eval(fs.readFileSync(__dirname + '/websocket.js').toString());
 
 var db = new mongodb.Db('test',new mongodb.Server("localhost", mongodb.Connection.DEFAULT_PORT, { auto_reconnect: true }), { w: 1 });
+var userDb;
 db.open(function(err, databaseConnection) {
 	if (err) {
 		return;
@@ -39,7 +40,8 @@ db.open(function(err, databaseConnection) {
 			return;
 		}
 		startWatch();
-		startWebSocket(collection);
+		userDb = collection;
+		startWebSocket();
 	});
 });
 

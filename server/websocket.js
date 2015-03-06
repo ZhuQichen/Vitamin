@@ -20,7 +20,7 @@
 
 var actionHandler = {
 	auth: function(username, password, callback) {
-		db.find({'user': username}).toArray(function(err, result) {
+		userDb.find({'user': username}).toArray(function(err, result) {
 			if (err || !(result[0] && (hash(password) === result[0].password) && result[0].uid)) {
 				callback(true);
 			} else {
