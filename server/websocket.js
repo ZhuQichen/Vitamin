@@ -19,59 +19,14 @@
  */
 
 var actionHandler = {
-	auth: function(db, user, password, callback) {
-		db.find({'user': user}).toArray(function(err, result) {
+	auth: function(username, password, callback) {
+		db.find({'user': username}).toArray(function(err, result) {
 			if (err || !(result[0] && (hash(password) === result[0].password) && result[0].uid)) {
 				callback(true);
 			} else {
 				callback(false, result[0].uid);
 			}
 		});
-	},
-
-	getDate: function(uid, vertex, callback) {
-		fs.stat(getDataPath(uid, vertex), function(err, stat) {
-			if (err) {
-				callback(err);
-			} else {
-				callback(null, stat.mtime.getTime());
-			}
-		});
-	},
-
-	getData: function(uid, vertex, callback) {
-		fs.readFile(getDataPath(uid, vertex), {encoding: 'utf8', flag: 'r'} , callback);
-	},
-
-	getMode: function(uid, vertex, callback) {
-		fs.readFile(getAttrPath(uid, vertex, 'mode'), {encoding: 'utf8', flag: 'r'} , callback);
-	},
-
-	getProfile: function(uid, vertex, callback) {
-		fs.readFile(getAttrPath(uid, vertex, 'profile'), {encoding: 'utf8', flag: 'r'} , callback);
-	},
-
-	getEdge: function(uid, vertex, callback) {
-		fs.readdir(getEdgePath(uid, vertex), callback);
-	},
-
-	getVertex: function(uid, vertex, callback) {
-		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Edge'];
-		var result = {};
-		var count = propertyList.length;
-		function readProperty(property) {
-			actionHandler['get' + property](uid, vertex, function(err, data) {
-				if (!err) {
-					result[property.toLowerCase()] = data;
-				}
-				if ((--count) <= 0) {
-					callback(result);
-				}
-			});
-		}
-		for (var i = 0; i < propertyList.length; i++) {
-			readProperty(propertyList[i]);
-		}
 	},
 
 	list: function(uid, callback) {
@@ -84,9 +39,9 @@ var actionHandler = {
 				if (count == 0) {
 					callback(null, list);
 				} else {
-					function readVertex(vertex) {
-						actionHandler.getVertex(uid, vertex, function(data) {
-							list[vertex] = data;
+					function readVertex(vid) {
+						actionHandler.getVertex(uid, vid, function(data) {
+							list[vid] = data;
 							if ((--count) <= 0) {
 								callback(null, list);
 							}
@@ -100,8 +55,68 @@ var actionHandler = {
 		});
 	},
 
-	getToday: function(uid, vertex, callback) {
-		xattr.get(getDataPath(uid, vertex), 'today_24', function(err, data) {
+	getDate: function(uid, vid, callback) {
+		fs.stat(getDataPath(uid, vid), function(err, stat) {
+			if (err) {
+				callback(err);
+			} else {
+				callback(null, stat.mtime.getTime());
+			}
+		});
+	},
+
+	getData: function(uid, vid, callback) {
+		readText(getDataPath(uid, vid) , callback);
+	},
+
+	getMode: function(uid, vid, callback) {
+		readText(getAttrPath(uid, vid, 'mode'), function (err, data) {
+			if (err) {
+				callback(err);
+			} else {
+				var mode = parseInt(data);
+				if (isNaN(mode)) {
+					callback(true);
+				} else {
+					callback(false, mode);
+				}
+			}
+		});
+	},
+
+	setMode: function(uid, vid, mode, callback) {
+		writeText(getAttrPath(uid, vid, 'mode'), mode, callback);
+	},
+
+	getProfile: function(uid, vid, callback) {
+		fs.readFile(getAttrPath(uid, vid, 'profile'), {encoding: 'utf8', flag: 'r'} , callback);
+	},
+
+	getEdge: function(uid, vid, callback) {
+		fs.readdir(getEdgePath(uid, vid), callback);
+	},
+
+	getVertex: function(uid, vid, callback) {
+		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Edge'];
+		var result = {};
+		var count = propertyList.length;
+		function readProperty(property) {
+			actionHandler['get' + property](uid, vid, function(err, data) {
+				if (!err) {
+					result[property.toLowerCase()] = data;
+				}
+				if ((--count) <= 0) {
+					callback(result);
+				}
+			});
+		}
+		for (var i = 0; i < propertyList.length; i++) {
+			readProperty(propertyList[i]);
+		}
+	},
+
+	getToday: function(uid, vid, callback) {
+		xattr.get(getDataPath(uid, vid), 'today_24', function(err, data) {
 			if (data) {
 				callback(err, data.toString());
 			} else {
@@ -110,56 +125,56 @@ var actionHandler = {
 		});
 	},
 
-	enable: function(uid, vertex, callback) {
-		xattr.set(getDataPath(uid, vertex), 'enable', '', callback);
+	setState: function(uid, vid, state, callback) {
+		xattr.set(getDataPath(uid, vid), state, '', callback);
 	},
 
-	disable: function(uid, vertex, callback) {
-		xattr.set(getDataPath(uid, vertex), 'disable', '', callback);
+	enable: function(uid, vid, callback) {
+		actionHandler.setState(uid, vid, 'enable', callback);
 	},
 
-	setRule: function(uid, vertex, data, callback) {
+	disable: function(uid, vid, callback) {
+		actionHandler.setState(uid, vid, 'disable', callback);
+	},
+
+	setHandler: function(uid, vid, rule, callback) {
 		var handler = 'def func(args):\n' +
-					  '\tr = (' + data.min + ', ' + data.max + ')\n' +
-					  '\treal_args = args.values()[0]\n' +
-					  '\tval = float(real_args.values()[' + data.aspect + '])\n' +
-					  '\tif val >= r[0] and val <= r[1]:\n' +
-					  '\t\treturn {"Enable":True}\n';
-		fs.writeFile(getAttrPath(uid, vertex, 'handler'), handler, {encoding: 'utf8', mode: 0644, flag: 'w'}, function(err) {
-			if (err) {
-				callback(err);
-			} else if (vertex !== data.dst) {
-				createFile(getEdgePath(uid, vertex) + '/' + data.dst, function(err) {
-					if (err && err.code !== 'EEXIST') {
-						callback(err);
-					} else {
-						callbakc(false);
-					}
-				});
-			} else {
-				callback(false);
-			}
-		});
+			'\tr = (' + rule.min + ', ' + rule.max + ')\n' +
+			'\treal_args = args.values()[0]\n' +
+			'\tval = float(real_args.values()[' + rule.aspect + '])\n' +
+			'\tif val >= r[0] and val <= r[1]:\n' +
+			'\t\treturn {"Enable":True}\n';
+		writeText(getAttrPath(uid, vid, 'handler'), handler, callback);
 	},
-	
-	setSync: function(uid, vertex, data, callback) {
-		fs.readFile(getAttrPath(uid, vertex, 'mode'), {encoding: 'utf8', flag: 'r'} , function(err, origMode) {
+
+	addEdge: function(uid, vid, dst, callback) {
+		createFile(getEdgePath(uid, vid, dst), callback);
+	},
+
+	setRule: function(uid, vid, rule, callback) {
+		if (parseFloat(rule.min) == rule.min && parseFloat(rule.max) == rule.max &&
+				parseInt(rule.aspect) == rule.aspect && testName(rule.dst)) {
+			actionHandler.setHandler(uid, vid, rule, function (err) {
+				if (err) {
+					callback(err);
+				} else if (vid !== rule.dst) {
+					actionHandler.addEdge(uid, vid, rule.dst, callback);
+				} else {
+					callback(false);
+				}
+			});
+		} else {
+			callback(true);
+		}
+	},
+
+	setSync: function(uid, vid, enabled, callback) {
+		actionHandler.getMode(uid, vid, function(err, mode) {
 			if (err) {
 				callback(err);
 			} else {
-				var mode = parseInt(origMode);
-				if (isNaN(mode)) {
-					callback(true);
-				} else {
-					mode = parseInt(mode / 128) * 128 + mode % 64 + (data ? 1 : 0) * 64;
-					fs.writeFile(getAttrPath(uid, vertex, 'mode'), mode, {encoding: 'utf8', mode: 0644, flag: 'w'}, function(err) {
-						if (err) {
-							callback(err);
-						} else {
-							callback(false);
-						}
-					});
-				}
+				mode = parseInt(mode / 128) * 128 + mode % 64 + (enabled ? 64 : 0);
+				actionHandler.setMode(uid, vid, mode, callback);
 			}
 		});
 	}
@@ -167,65 +182,64 @@ var actionHandler = {
 
 var watchList = {};
 
+var webSocketServer;
 function startWebSocket(db) {
-	webSocketServer = new WebSocketServer({port: 8090});
+	webSocketServer = new WebSocketServer({port: WEBSOCKET_PORT});
 	webSocketServer.on('connection', function(webSocket) {
-		var session = {id: randomId(), uid: '', path: '', watchState: false, webSocket: webSocket};
+		var session = {id: randomId(), uid: '', watchState: false, webSocket: webSocket};
 		function webSocketSend(messageId, err, data) {
-			webSocket.send(JSON.stringify({id: messageId, err: Boolean(err), data: data}));
+			var message = {id: messageId};
 			if (err) {
 				debugLog(err);
+				message.err = true;
 			}
+			if (typeof data !== 'undefined') {
+				message.data = data;
+			}
+			webSocket.send(JSON.stringify(message));
 		}
-		
+
 		webSocket.on('message', function(messageString) {
 			debugLog('Client: ' + messageString);
-			try { var message = JSON.parse(messageString); } catch (e) { return; }
-			if (!(message && message.action && actionHandler.hasOwnProperty(message.action))) return;
+			try {
+				var message = JSON.parse(messageString);
+			} catch(e) {
+				return;
+			}
+			if ((message.action !== 'auth' && session.uid === '') ||
+				!actionHandler.hasOwnProperty(message.action) || message.id == null) return;
+			var handler = actionHandler[message.action];
+			function done(err, data) {
+				webSocketSend(message.id, err, data);
+			}
 			if (message.action === 'auth') {
-				if (message.data && message.data.user && message.data.password) {
-					actionHandler[message.action](db, message.data.user, message.data.password, function(err, uid) {
-						if (!err) {
-							session.uid = uid;
-							session.path = devfsPath + '/' + uid;
-						}
-						webSocketSend(message.id, err);
-					});
-				} else {
-					webSocketSend(message.id, true);
-				}
-			} else if (session.uid) {
-				if (message.action === 'list') {
-					actionHandler[message.action](session.uid, function(err, list) {
-						webSocketSend(message.id, err, list);
-						if (!session.watchState) {
-							var date = {};
-							for (var i in list) {
-								date[i] = list[i].date;
-							}
-							addWatch(session, date, webSocketSend, message.id);
-						}
-					});
-				} else if (message.vertex) {
-					if (message.action.indexOf('get') == 0) {
-						actionHandler[message.action](session.uid, message.vertex, function(err, data) {
-							webSocketSend(message.id, err, data);
-						});
-					} else if (message.action.indexOf('set') == 0) {
-						if (typeof(message.data) !== 'undefined') {
-							actionHandler[message.action](session.uid, message.vertex, message.data, function(err) {
-								webSocketSend(message.id, err);
-							});
-						}
-					} else if ((message.action === 'enable') || (message.action === 'disable')) {
-						actionHandler[message.action](session.uid, message.vertex, function(err) {
-							webSocketSend(message.id, err);
-						});
+				if (!(typeof message.data === 'object' && message.data.user && message.data.password)) return;
+				handler(message.data.user, message.data.password, function (err, uid) {
+					if (!err) {
+						session.uid = uid;
 					}
+					done(err);
+				});
+			} else if (message.action === 'list') {
+				handler(session.uid, function (err, list) {
+					done(err, list);
+					if (!session.watchState) {
+						var date = {};
+						for (var i in list) {
+							date[i] = list[i].date;
+						}
+						addWatch(session, date, webSocketSend, message.id);
+					}
+				});
+			} else if (testName(message.vertex)) {
+				if (handler.length === 3) {
+					handler(session.uid, message.vertex, done);
+				} else if (message.data != null) {
+					handler(session.uid, message.vertex, message.data, done);
 				}
 			}
 		});
-		
+
 		webSocket.on('close', function() {
 			if (session.uid in watchList) {
 				if (session.id in watchList[session.uid].send) {
@@ -237,7 +251,7 @@ function startWebSocket(db) {
 			}
 			debugLog("Close");
 		});
-		
+
 		webSocket.on('error', function() {
 			debugLog("Error");
 		});
@@ -245,7 +259,7 @@ function startWebSocket(db) {
 }
 
 function scan(watch) {
-	fs.readdir(watch.session.path, function(err, data) {
+	fs.readdir(getUserPath(watch.session.uid), function(err, data) {
 		if (err) {
 			debugLog(err);
 		} else {
@@ -282,13 +296,13 @@ function scan(watch) {
 				return;
 			}
 			function readVertex(index) {
-				var vertex = data[index];
-				fs.stat(watch.session.path + '/' + vertex, function(err, data) {
+				var vid = data[index];
+				fs.stat(getDataPath(watch.session.uid, vid), function(err, data) {
 					if (err) {
 						debugLog(err);
-						newDate[vertex] = 0;
+						newDate[vid] = 0;
 					} else if (data.isFile()) {
-						newDate[vertex] = data.mtime.getTime();
+						newDate[vid] = data.mtime.getTime();
 					}
 					count--;
 					if (count <= 0) {

@@ -53,15 +53,15 @@ func GetVertexPropertyPath(uid string, property string, vid string) string {
 	return GetPropertyPath(uid, property) + "/" + vid
 }
 
-func GetVertexPropertySubVertexPath(uid string, property string, vid string, subVid string) string {
-	return GetVertexPropertyPath(uid, property, vid) + "/" + subVid
+func GetVertexPropertyDstPath(uid string, property string, vid string, dst string) string {
+	return GetVertexPropertyPath(uid, property, vid) + "/" + dst
 }
 
-func GetPath(uid string, property string, vid string, subVid string) string {
+func GetPath(uid string, property string, vid string, dst string) string {
 	if property != "" {
 		if vid != "" {
-			if subVid != "" {
-				return GetVertexPropertySubVertexPath(uid, property, vid, subVid)
+			if dst != "" {
+				return GetVertexPropertyDstPath(uid, property, vid, dst)
 			}
 			return GetVertexPropertyPath(uid, property, vid)
 		}
@@ -73,12 +73,12 @@ func GetPath(uid string, property string, vid string, subVid string) string {
 	return GetUserPath(uid)
 }
 
-func GetEdgePath(uid string, vid string, subVid string) string {
-	return GetPath(uid, "edge", vid, subVid)
+func GetEdgePath(uid string, vid string, dst string) string {
+	return GetPath(uid, "edge", vid, dst)
 }
 
-func GetVertexPath(uid string, vid string, subVid string) string {
-	return GetPath(uid, "vertex", vid, subVid)
+func GetVertexPath(uid string, vid string, dst string) string {
+	return GetPath(uid, "vertex", vid, dst)
 }
 
 func GetAttrPath(uid string, vid string, attr string) string {

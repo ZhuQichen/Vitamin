@@ -138,8 +138,8 @@ func SetHandler(uid, vid, min, max, aspect string) error {
 	return WriteText(GetAttrPath(uid, vid, "handler"), handler)
 }
 
-func AddEdge(uid, vid, subVid string) error {
-	return CreateFile(GetEdgePath(uid, vid, subVid))
+func AddEdge(uid, vid, dst string) error {
+	return CreateFile(GetEdgePath(uid, vid, dst))
 }
 
 type Rule struct {

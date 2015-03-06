@@ -19,7 +19,7 @@
  */
 
 function debugLog(log) {
-	if (debugFlag) {
+	if (DEBUG_FLAG) {
 		process.stdout.write(new Date().toString() + ' ');
 		console.log(log);
 	}
@@ -40,72 +40,80 @@ var randomId = (function() {
 	};
 })();
 
-function createFile(path, callback) {
-	fs.open(path, 'wx', 0644, function(err, fd){
-		if (err) {
-			callback(err);
-		} else {
-			fs.close(fd, callback);
-		}
-	});
-}
-
-function parseName(name) {
-	if (typeof(name) === 'string' && name.length === 32 && name.match(/^[0-9a-f]+$/)) {
-		return name;
-	} else {
-		throw 'NameError';
-	}
+function testName(name) {
+	return typeof(name) === 'string' && name.length === 32 && !!name.match(/^[0-9a-f]+$/);
 }
 
 function getUserPath(uid) {
-	return devfsPath + '/' + uid;
+	return DEVFS_PATH + '/' + uid;
 }
 
-function getDataPath(uid, vertex) {
-	return getUserPath(uid) + '/' + vertex;
+function getDataPath(uid, vid) {
+	return getUserPath(uid) + '/' + vid;
 }
 
 function getPropertyPath(uid, property) {
 	return getUserPath(uid) + '/' + property;
 }
 
-function getVertexPropertyPath(uid, property, vertex) {
-	return getPropertyPath(uid, property) + '/' + vertex;
+function getVertexPropertyPath(uid, property, vid) {
+	return getPropertyPath(uid, property) + '/' + vid;
 }
 
-function getVertexPropertySubVertexPath(uid, property, vertex, subVertex) {
-	return getVertexPropertyPath(uid, property, vertex) + '/' + subVertex;
+function getVertexPropertyDstPath(uid, property, vid, dst) {
+	return getVertexPropertyPath(uid, property, vid) + '/' + dst;
 }
 
-function getPath(uid, property, vertex, subVertex) {
+function getPath(uid, property, vid, dst) {
 	if (property) {
-		if (vertex) {
-			if (subVertex) {
-				return getVertexPropertySubVertexPath(uid, property, vertex, subVertex);
+		if (vid) {
+			if (dst) {
+				return getVertexPropertyDstPath(uid, property, vid, dst);
 			} else {
-				return getVertexPropertyPath(uid, property, vertex);
+				return getVertexPropertyPath(uid, property, vid);
 			}
 		} else {
 			return getPropertyPath(uid, property);
 		}
 	} else {
-		if (vertex) {
-			return getDataPath(uid, vertex);
+		if (vid) {
+			return getDataPath(uid, vid);
 		} else {
 			return getUserPath(uid);
 		}
 	}
 }
 
-function getEdgePath(uid, vertex, subVertex) {
-	return getPath(uid, 'edge', vertex, subVertex);
+function getEdgePath(uid, vid, dst) {
+	return getPath(uid, 'edge', vid, dst);
 }
 
-function getVertexPath(uid, vertex, subVertex) {
-	return getPath(uid, 'vertex', vertex, subVertex);
+function getVertexPath(uid, vid, dst) {
+	return getPath(uid, 'vertex', vid, dst);
 }
 
-function getAttrPath(uid, vertex, attr) {
-	return getPath(uid, 'attr', vertex, attr);
+function getAttrPath(uid, vid, attr) {
+	return getPath(uid, 'attr', vid, attr);
+}
+
+function createFile(path, callback) {
+	fs.open(path, 'wx', 0644, function(err, fd){
+		if (err) {
+			if (err.code === 'EEXIST') {
+				callback(false);
+			} else {
+				callback(err);
+			}
+		} else {
+			fs.close(fd, callback);
+		}
+	});
+}
+
+function readText(path, callback) {
+	fs.readFile(path, {encoding: 'utf8', flag: 'r'}, callback);
+}
+
+function writeText(path, text, callback) {
+	fs.writeFile(path, text, {encoding: 'utf8', mode: 0644, flag: 'w'}, callback);
 }

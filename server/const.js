@@ -18,5 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-var debugFlag = true;
-var devfsPath = '/mnt/vdev';
+var DEBUG_FLAG = true;
+var DEVFS_PATH = '/mnt/vdev';
+var WEBSOCKET_PORT = 8090;
