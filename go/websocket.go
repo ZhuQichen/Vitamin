@@ -124,7 +124,7 @@ func List(uid string) (map[string]Vertex, error) {
 }
 
 func GetToday(uid, vid string) (string, error) {
-	today, err := xattr.Getxattr(GetDataPath(uid, vid), "today_24", 0, 0)
+	today, err := xattr.Getxattr(GetDataPath(uid, vid), "scan:{'today': {'limit': 24}}", 0, 0)
 	return string(today), err
 }
 
