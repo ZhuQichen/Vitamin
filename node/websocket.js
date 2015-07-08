@@ -70,7 +70,7 @@ var actionHandler = {
 	},
 
 	getMode: function(uid, vid, callback) {
-		readText(getAttrPath(uid, vid, 'mode'), function (err, data) {
+		readText(getAttrPath(uid, vid, 'mode'), function(err, data) {
 			if (err) {
 				callback(err);
 			} else {
