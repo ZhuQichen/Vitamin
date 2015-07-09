@@ -143,7 +143,9 @@ var actionHandler = {
 			'\treal_args = args.values()[0]\n' +
 			'\tval = float(real_args.values()[' + rule.aspect + '])\n' +
 			'\tif val >= r[0] and val <= r[1]:\n' +
-			'\t\treturn {"Enable":True}\n';
+			'\t\treturn {"Enable":True}\n' +
+			'\telse:\n' +
+			'\t\treturn {"Enable":False}\n';
 		writeText(getAttrPath(uid, vid, 'handler'), handler, callback);
 	},
 
