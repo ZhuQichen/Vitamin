@@ -121,7 +121,7 @@ function writeText(path, text, callback) {
 function readJSON(path, callback) {
 	readText(path, function (err, data) {
 		if (err) {
-			callback(true);
+			callback(err);
 		} else {
 			try {
 				var json = JSON.parse(data);
