@@ -154,13 +154,16 @@ var actionHandler = {
 	},
 
 	setRule: function(uid, vid, rule, callback) {
-		if (parseFloat(rule.min) == rule.min && parseFloat(rule.max) == rule.max &&
-				parseInt(rule.aspect) == rule.aspect && testName(rule.dst)) {
-			actionHandler.setHandler(uid, vid, rule, function (err) {
+		if (parseInt(rule.aspect) == rule.aspect && testName(rule.dst) && vid !== rule.dst) {
+			actionHandler.addEdge(uid, vid, rule.dst, function(err) {
 				if (err) {
 					callback(err);
-				} else if (vid !== rule.dst) {
-					actionHandler.addEdge(uid, vid, rule.dst, callback);
+				} else if ('min' in rule && 'max' in rule) {
+					if (parseFloat(rule.min) == rule.min && parseFloat(rule.max) == rule.max) {
+						actionHandler.setHandler(uid, vid, rule, callback);
+					} else {
+						callback(true);
+					}
 				} else {
 					callback(false);
 				}
