@@ -89,7 +89,7 @@ var actionHandler = {
 	},
 
 	getProfile: function(uid, vid, callback) {
-		fs.readFile(getAttrPath(uid, vid, 'profile'), {encoding: 'utf8', flag: 'r'} , callback);
+		readJSON(getAttrPath(uid, vid, 'profile'), callback);
 	},
 
 	getEdge: function(uid, vid, callback) {
@@ -180,7 +180,7 @@ var actionHandler = {
 			}
 		});
 	}
-}
+};
 
 var watchList = {};
 

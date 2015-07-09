@@ -27,7 +27,7 @@ function debugLog(log) {
 
 function md5(str) {
 	return crypto.createHash('md5').update(str).digest('hex');
-};
+}
 
 var hash = md5;
 
@@ -116,4 +116,19 @@ function readText(path, callback) {
 
 function writeText(path, text, callback) {
 	fs.writeFile(path, text, {encoding: 'utf8', mode: 0644, flag: 'w'}, callback);
+}
+
+function readJSON(path, callback) {
+	readText(path, function (err, data) {
+		if (err) {
+			callback(true);
+		} else {
+			try {
+				var json = JSON.parse(data);
+			} catch (e) {
+				callback(true);
+			}
+			callback(false, json);
+		}
+	});
 }
