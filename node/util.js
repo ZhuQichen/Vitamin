@@ -127,6 +127,7 @@ function readJSON(path, callback) {
 				var json = JSON.parse(data);
 			} catch (e) {
 				callback(true);
+				return;
 			}
 			callback(false, json);
 		}
