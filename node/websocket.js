@@ -39,17 +39,14 @@ var actionHandler = {
 				if (count == 0) {
 					callback(null, list);
 				} else {
-					function readVertex(vid) {
+					data.forEach(function(vid) {
 						actionHandler.getVertex(uid, vid, function(data) {
 							list[vid] = data;
 							if ((--count) <= 0) {
 								callback(null, list);
 							}
 						});
-					}
-					for (var i in data) {
-						readVertex(data[i]);
-					}
+					});
 				}
 			}
 		});
@@ -97,10 +94,10 @@ var actionHandler = {
 	},
 
 	getVertex: function(uid, vid, callback) {
-		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Edge'];
 		var result = {};
+		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Edge'];
 		var count = propertyList.length;
-		function readProperty(property) {
+		propertyList.forEach(function(property) {
 			actionHandler['get' + property](uid, vid, function(err, data) {
 				if (!err) {
 					result[property.toLowerCase()] = data;
@@ -109,10 +106,7 @@ var actionHandler = {
 					callback(result);
 				}
 			});
-		}
-		for (var i = 0; i < propertyList.length; i++) {
-			readProperty(propertyList[i]);
-		}
+		});
 	},
 
 	getToday: function(uid, vid, callback) {
@@ -300,8 +294,7 @@ function scan(watch) {
 				getVertexListDone();
 				return;
 			}
-			function readVertex(index) {
-				var vid = data[index];
+			data.forEach(function(vid) {
 				fs.stat(getDataPath(watch.session.uid, vid), function(err, data) {
 					if (err) {
 						debugLog(err);
@@ -314,10 +307,7 @@ function scan(watch) {
 						getVertexListDone();
 					}
 				});
-			}
-			for (var index = 0; index < data.length; index++) {
-				readVertex(index);
-			}
+			});
 		}
 	});
 }
