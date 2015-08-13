@@ -118,18 +118,22 @@ function writeText(path, text, callback) {
 	fs.writeFile(path, text, {encoding: 'utf8', mode: 0644, flag: 'w'}, callback);
 }
 
+function parseJSON(data, callback) {
+	try {
+		var json = JSON.parse(data);
+	} catch (e) {
+		callback(true);
+		return;
+	}
+	callback(false, json);
+}
+
 function readJSON(path, callback) {
 	readText(path, function (err, data) {
 		if (err) {
 			callback(err);
 		} else {
-			try {
-				var json = JSON.parse(data);
-			} catch (e) {
-				callback(true);
-				return;
-			}
-			callback(false, json);
+			parseJSON(data, callback);
 		}
 	});
 }
