@@ -111,10 +111,10 @@ var actionHandler = {
 
 	getToday: function(uid, vid, callback) {
 		xattr.get(getDataPath(uid, vid), "scan:{'today': {'limit': 24}}", function(err, data) {
-			if (data) {
-				callback(err, data.toString());
-			} else {
+			if (err) {
 				callback(err);
+			} else {
+				parseJSON(data, callback);
 			}
 		});
 	},
