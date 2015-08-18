@@ -40,8 +40,10 @@ var actionHandler = {
 					callback(null, list);
 				} else {
 					data.forEach(function(vid) {
-						actionHandler.getVertex(uid, vid, function(data) {
-							list[vid] = data;
+						actionHandler.getVertex(uid, vid, function(err, data) {
+							if (!err) {
+								list[vid] = data;
+							}
 							if ((--count) <= 0) {
 								callback(null, list);
 							}
@@ -96,17 +98,21 @@ var actionHandler = {
 	getVertex: function(uid, vid, callback) {
 		var result = {};
 		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Edge'];
-		var count = propertyList.length;
-		propertyList.forEach(function(property) {
-			actionHandler['get' + property](uid, vid, function(err, data) {
-				if (!err) {
-					result[property.toLowerCase()] = data;
-				}
-				if ((--count) <= 0) {
-					callback(result);
+		function getProperty(i) {
+			actionHandler['get' + propertyList[i]](uid, vid, function(err, data) {
+				if (err) {
+					callback(err);
+				} else {
+					result[propertyList[i].toLowerCase()] = data;
+					if (i <= 0) {
+						callback(null, result);
+					} else {
+						getProperty(i - 1);
+					}
 				}
 			});
-		});
+		}
+		getProperty(propertyList.length - 1);
 	},
 
 	getToday: function(uid, vid, callback) {
