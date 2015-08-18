@@ -119,13 +119,17 @@ function writeText(path, text, callback) {
 }
 
 function parseJSON(data, callback) {
-	try {
-		var json = JSON.parse(data);
-	} catch (e) {
-		callback(true);
-		return;
+	if (data === '') {
+		callback(false, {});
+	} else {
+		try {
+			var json = JSON.parse(data);
+		} catch (e) {
+			callback(true);
+			return;
+		}
+		callback(false, json);
 	}
-	callback(false, json);
 }
 
 function readJSON(path, callback) {
