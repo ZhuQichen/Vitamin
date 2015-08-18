@@ -212,7 +212,7 @@ function startWebSocket(db) {
 				return;
 			}
 			if ((message.action !== 'auth' && session.uid === '') ||
-				!actionHandler.hasOwnProperty(message.action) || message.id == null) return;
+				!actionHandler.hasOwnProperty(message.action) || typeof message.id !== 'number') return;
 			var handler = actionHandler[message.action];
 			function done(err, data) {
 				webSocketSend(message.id, err, data);
