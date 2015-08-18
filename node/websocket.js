@@ -63,7 +63,7 @@ var actionHandler = {
 	},
 
 	getData: function(uid, vid, callback) {
-		readText(getDataPath(uid, vid) , callback);
+		readJSON(getDataPath(uid, vid) , callback);
 	},
 
 	getMode: function(uid, vid, callback) {
