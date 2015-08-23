@@ -77,7 +77,11 @@ var actionHandler = {
 				if (isNaN(mode)) {
 					callback(true);
 				} else {
-					callback(false, mode);
+					callback(null, {
+						bool: parseInt((mode % 1024) / 512) === 1,
+						visible: parseInt((mode % 256) / 128) === 1,
+						sync: parseInt((mode % 128) / 64) === 1
+					});
 				}
 			}
 		});
