@@ -101,7 +101,7 @@ var actionHandler = {
 
 	getVertex: function(uid, vid, callback) {
 		var result = {};
-		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Edge'];
+		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Handler', 'Edge'];
 		function getProperty(i) {
 			actionHandler['get' + propertyList[i]](uid, vid, function(err, data) {
 				if (err) {
