@@ -129,16 +129,8 @@ var actionHandler = {
 		});
 	},
 
-	setState: function(uid, vid, state, callback) {
-		xattr.set(getDataPath(uid, vid), state, '', callback);
-	},
-
-	enable: function(uid, vid, callback) {
-		actionHandler.setState(uid, vid, 'enable', callback);
-	},
-
-	disable: function(uid, vid, callback) {
-		actionHandler.setState(uid, vid, 'disable', callback);
+	setEnabled: function(uid, vid, enabled, callback) {
+		xattr.set(getDataPath(uid, vid), enabled ? 'enable' : 'disable', '', callback);
 	},
 
 	setHandler: function(uid, vid, rule, callback) {
