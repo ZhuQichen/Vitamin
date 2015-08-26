@@ -133,18 +133,6 @@ var actionHandler = {
 		xattr.set(getDataPath(uid, vid), enabled ? 'enable' : 'disable', '', callback);
 	},
 
-	setHandler: function(uid, vid, rule, callback) {
-		var handler = 'def func(args):\n' +
-			'\tr = (' + rule.min + ', ' + rule.max + ')\n' +
-			'\treal_args = args.values()[0]\n' +
-			'\tval = float(real_args.values()[' + rule.aspect + '])\n' +
-			'\tif val >= r[0] and val <= r[1]:\n' +
-			'\t\treturn {"Enable":True}\n' +
-			'\telse:\n' +
-			'\t\treturn {"Enable":False}\n';
-		writeText(getAttrPath(uid, vid, 'handler'), handler, callback);
-	},
-
 	addEdge: function(uid, vid, dst, callback) {
 		createFile(getEdgePath(uid, vid, dst), callback);
 	},
@@ -153,21 +141,18 @@ var actionHandler = {
 		fs.unlink(getEdgePath(uid, vid, dst), callback);
 	},
 
-	setRule: function(uid, vid, rule, callback) {
-		if (parseInt(rule.aspect) == rule.aspect && testName(rule.dst) && vid !== rule.dst) {
-			actionHandler.addEdge(uid, vid, rule.dst, function(err) {
-				if (err) {
-					callback(err);
-				} else if ('min' in rule && 'max' in rule) {
-					if (parseFloat(rule.min) == rule.min && parseFloat(rule.max) == rule.max) {
-						actionHandler.setHandler(uid, vid, rule, callback);
-					} else {
-						callback(true);
-					}
-				} else {
-					callback(false);
-				}
-			});
+	setHandler: function(uid, vid, rule, callback) {
+		if ('aspect' in rule && 'min' in rule && 'max' in rule && parseFloat(rule.min) === rule.min && parseFloat(rule.max) === rule.max) {
+			var handler = '# ' + JSON.stringify(rule) + '\n' +
+				'def func(args):\n' +
+				'\tr = (' + rule.min + ', ' + rule.max + ')\n' +
+				'\treal = args.popitem()[1]\n' +
+				'\tval = float(real[' + rule.aspect + '])\n' +
+				'\tif val >= r[0] and val <= r[1]:\n' +
+				'\t\treturn {"Enable": True}\n' +
+				'\telse:\n' +
+				'\t\treturn {"Enable": False}\n';
+			writeText(getAttrPath(uid, vid, 'handler'), handler, callback);
 		} else {
 			callback(true);
 		}
