@@ -149,6 +149,10 @@ var actionHandler = {
 		createFile(getEdgePath(uid, vid, dst), callback);
 	},
 
+	removeEdge: function(uid, vid, dst, callback) {
+		fs.unlink(getEdgePath(uid, vid, dst), callback);
+	},
+
 	setRule: function(uid, vid, rule, callback) {
 		if (parseInt(rule.aspect) == rule.aspect && testName(rule.dst) && vid !== rule.dst) {
 			actionHandler.addEdge(uid, vid, rule.dst, function(err) {
