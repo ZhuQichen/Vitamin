@@ -150,7 +150,7 @@ var actionHandler = {
 					callback(err);
 				}
 			} else {
-				parseJSON(data.substr(2, str.indexOf("\n") - 2), callback);
+				parseJSON(data.substr(2, data.indexOf("\n") - 2), callback);
 			}
 		});
 	},
