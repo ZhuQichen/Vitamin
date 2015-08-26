@@ -144,7 +144,11 @@ var actionHandler = {
 	getHandler: function(uid, vid, callback) {
 		readText(getAttrPath(uid, vid, 'handler'), function(err, data) {
 			if (err) {
-				callback(err);
+				if (err.code === 'ENOENT') {
+					callback(null, {});
+				} else {
+					callback(err);
+				}
 			} else {
 				parseJSON(data.substr(2, str.indexOf("\n") - 2), callback);
 			}
