@@ -141,6 +141,16 @@ var actionHandler = {
 		fs.unlink(getEdgePath(uid, vid, dst), callback);
 	},
 
+	getHandler: function(uid, vid, callback) {
+		readText(getAttrPath(uid, vid, 'handler'), function(err, data) {
+			if (err) {
+				callback(err);
+			} else {
+				parseJSON(data.substr(2, str.indexOf("\n") - 2), callback);
+			}
+		});
+	},
+
 	setHandler: function(uid, vid, rule, callback) {
 		if ('aspect' in rule && 'min' in rule && 'max' in rule && parseFloat(rule.min) === rule.min && parseFloat(rule.max) === rule.max) {
 			var handler = '# ' + JSON.stringify(rule) + '\n' +
