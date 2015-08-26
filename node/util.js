@@ -97,13 +97,9 @@ function getAttrPath(uid, vid, attr) {
 }
 
 function createFile(path, callback) {
-	fs.open(path, 'wx', 0644, function(err, fd){
+	fs.open(path, 'a', 0644, function(err, fd){
 		if (err) {
-			if (err.code === 'EEXIST') {
-				callback(false);
-			} else {
-				callback(err);
-			}
+			callback(err);
 		} else {
 			fs.close(fd, callback);
 		}
