@@ -161,7 +161,7 @@ var actionHandler = {
 				'def func(args):\n' +
 				'\tr = (' + rule.min + ', ' + rule.max + ')\n' +
 				'\treal = args.popitem()[1]\n' +
-				'\tval = float(real[' + rule.aspect + '])\n' +
+				'\tval = float(real' + JSON.stringify([rule.aspect]) + ')\n' +
 				'\tif val >= r[0] and val <= r[1]:\n' +
 				'\t\treturn {"Enable": True}\n' +
 				'\telse:\n' +
