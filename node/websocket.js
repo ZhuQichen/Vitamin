@@ -29,31 +29,6 @@ var actionHandler = {
 		});
 	},
 
-	list: function(uid, callback) {
-		fs.readdir(getVertexPath(uid), function(err, data) {
-			if (err) {
-				callback(err);
-			} else {
-				var count = data.length;
-				var list = {};
-				if (count == 0) {
-					callback(null, list);
-				} else {
-					data.forEach(function(vid) {
-						actionHandler.getVertex(uid, vid, function(err, data) {
-							if (!err) {
-								list[vid] = data;
-							}
-							if ((--count) <= 0) {
-								callback(null, list);
-							}
-						});
-					});
-				}
-			}
-		});
-	},
-
 	getDate: function(uid, vid, callback) {
 		fs.stat(getDataPath(uid, vid), function(err, stat) {
 			if (err) {
@@ -91,54 +66,19 @@ var actionHandler = {
 		writeText(getAttrPath(uid, vid, 'mode'), mode, callback);
 	},
 
-	getProfile: function(uid, vid, callback) {
-		readJSON(getAttrPath(uid, vid, 'profile'), callback);
-	},
-
-	getEdge: function(uid, vid, callback) {
-		fs.readdir(getEdgePath(uid, vid), callback);
-	},
-
-	getVertex: function(uid, vid, callback) {
-		var result = {};
-		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Handler', 'Edge'];
-		function getProperty(i) {
-			actionHandler['get' + propertyList[i]](uid, vid, function(err, data) {
-				if (err) {
-					callback(err);
-				} else {
-					result[propertyList[i].toLowerCase()] = data;
-					if (i <= 0) {
-						callback(null, result);
-					} else {
-						getProperty(i - 1);
-					}
-				}
-			});
-		}
-		getProperty(propertyList.length - 1);
-	},
-
-	getToday: function(uid, vid, callback) {
-		xattr.get(getDataPath(uid, vid), "scan:{'today': {'limit': 24}}", function(err, data) {
+	setSync: function(uid, vid, enabled, callback) {
+		actionHandler.getMode(uid, vid, function(err, mode) {
 			if (err) {
 				callback(err);
 			} else {
-				parseJSON(data, callback);
+				mode = parseInt(mode / 128) * 128 + mode % 64 + (enabled ? 64 : 0);
+				actionHandler.setMode(uid, vid, mode, callback);
 			}
 		});
 	},
 
-	setEnabled: function(uid, vid, enabled, callback) {
-		xattr.set(getDataPath(uid, vid), enabled ? 'enable' : 'disable', '', callback);
-	},
-
-	addEdge: function(uid, vid, dst, callback) {
-		createFile(getEdgePath(uid, vid, dst), callback);
-	},
-
-	removeEdge: function(uid, vid, dst, callback) {
-		fs.unlink(getEdgePath(uid, vid, dst), callback);
+	getProfile: function(uid, vid, callback) {
+		readJSON(getAttrPath(uid, vid, 'profile'), callback);
 	},
 
 	getHandler: function(uid, vid, callback) {
@@ -172,13 +112,73 @@ var actionHandler = {
 		}
 	},
 
-	setSync: function(uid, vid, enabled, callback) {
-		actionHandler.getMode(uid, vid, function(err, mode) {
+	getEdge: function(uid, vid, callback) {
+		fs.readdir(getEdgePath(uid, vid), callback);
+	},
+
+	addEdge: function(uid, vid, dst, callback) {
+		createFile(getEdgePath(uid, vid, dst), callback);
+	},
+
+	removeEdge: function(uid, vid, dst, callback) {
+		fs.unlink(getEdgePath(uid, vid, dst), callback);
+	},
+
+	getToday: function(uid, vid, callback) {
+		xattr.get(getDataPath(uid, vid), "scan:{'today': {'limit': 24}}", function(err, data) {
 			if (err) {
 				callback(err);
 			} else {
-				mode = parseInt(mode / 128) * 128 + mode % 64 + (enabled ? 64 : 0);
-				actionHandler.setMode(uid, vid, mode, callback);
+				parseJSON(data, callback);
+			}
+		});
+	},
+
+	setEnabled: function(uid, vid, enabled, callback) {
+		xattr.set(getDataPath(uid, vid), enabled ? 'enable' : 'disable', '', callback);
+	},
+
+	getVertex: function(uid, vid, callback) {
+		var result = {};
+		var propertyList = ['Date', 'Data', 'Mode', 'Profile', 'Handler', 'Edge'];
+		function getProperty(i) {
+			actionHandler['get' + propertyList[i]](uid, vid, function(err, data) {
+				if (err) {
+					callback(err);
+				} else {
+					result[propertyList[i].toLowerCase()] = data;
+					if (i <= 0) {
+						callback(null, result);
+					} else {
+						getProperty(i - 1);
+					}
+				}
+			});
+		}
+		getProperty(propertyList.length - 1);
+	},
+
+	list: function(uid, callback) {
+		fs.readdir(getVertexPath(uid), function(err, data) {
+			if (err) {
+				callback(err);
+			} else {
+				var count = data.length;
+				var list = {};
+				if (count == 0) {
+					callback(null, list);
+				} else {
+					data.forEach(function(vid) {
+						actionHandler.getVertex(uid, vid, function(err, data) {
+							if (!err) {
+								list[vid] = data;
+							}
+							if ((--count) <= 0) {
+								callback(null, list);
+							}
+						});
+					});
+				}
 			}
 		});
 	}
